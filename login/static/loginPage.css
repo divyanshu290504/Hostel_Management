@@ -1,0 +1,54 @@
+html,#login {
+    height: 100%;
+    margin: 0;
+}
+
+#login {
+    background-image: linear-gradient(rgb(4, 4, 172), white);
+    background-size: 100% 100%; /* To cover the entire viewport */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.form-container {
+    text-align: center; /* Center the form elements horizontally */
+    height: 600px;
+    width: 400px;
+    padding: 20px;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: skyblue;
+    border-radius: 15px;
+}
+
+#welcome-text{
+   margin-top: 20px;
+   font-size: 55px; 
+}
+
+#username{
+    margin-top: 100px;
+    width: 300px;
+    height: 40px;
+    border-radius: 20px;
+    border: none;
+    text-align: center;
+}
+
+#password{
+    margin-top: 80px;
+    width: 300px;
+    height: 40px;
+    border-radius: 20px;
+    border: none;
+    text-align: center;
+}
+
+.btn{
+    border-radius: 20px;
+    width: 80px;
+    height: 40px;
+    background-color: green;
+}
