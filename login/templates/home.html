@@ -8,8 +8,11 @@
 </head>
 <body>
     <div class="navbar">
-        <div class="logo"><img src="PESU-new-logo.png" alt=""></div>
+        <div class="logo"><img src="../static/new.png" alt=""></div>
         <div id="nav-text">HOSTEL MANAGEMENT</div>
-        <a href="{{ url_for('login') }}" target="_blank"><button class="btn">Login for Student</button></a>    
+        <div>
+            <a href="{{ url_for('login') }}" target="_blank"><button class="btn">Login for Student</button></a>    
+            <a href="{{ url_for('register')}}" target="_blank"><button class="btn">Register for Hostel</button></a>
+        </div>
     </div>
 </body>
