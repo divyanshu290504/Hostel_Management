@@ -11,7 +11,7 @@ app.secret_key = 'your secret key'
 conn = mysql.connector.connect(
       host="localhost",
       user="root",
-      database="hostel_db",
+      database="dbms_project",
       password="mysql"
       )
 
@@ -53,6 +53,10 @@ def logout():
 	session.pop('id', None)
 	session.pop('username', None)
 	return redirect(url_for('login'))
+
+@app.route('/register', methods =['GET', 'POST'])
+def register():
+	return render_template('register.html')
 
 if __name__ == "__main__":
 	app.run()
