@@ -1,16 +1,14 @@
 # Store this code in 'app.py' file
 
 from flask import Flask, render_template, request, redirect, url_for, session
-from flask_mysqldb import MySQL
-import MySQLdb.cursors
-import re
 import mysql.connector
-from datetime import datetime,date
+from datetime import date
 
 app = Flask(__name__)
 app.secret_key = 'your secret key'
-
-i = 1
+import re
+def change_date_format(dt):
+	return re.sub(r'(\d{4})-(\d{1,2})-(\d{1,2})', '\\3-\\2-\\1', dt)
 
 @app.route('/')
 def home():
@@ -61,12 +59,7 @@ def logout():
 
 @app.route('/register', methods =['GET', 'POST'])
 def register():
-	i =0
-	msg=''
 	
-	import re
-	def change_date_format(dt):
-		return re.sub(r'(\d{4})-(\d{1,2})-(\d{1,2})', '\\3-\\2-\\1', dt)
 	print(request.form)
 	if request.method == 'POST' and len(request.form) != 0:
 		conn = mysql.connector.connect(
@@ -75,7 +68,6 @@ def register():
       database="hostel_db",
       password="mysql"
       )
-		i += 1
 		name = request.form['Name']
 		Legal_ID = request.form['Legal_ID']
 		Phone_No = request.form['Phone_No']
@@ -132,6 +124,34 @@ def register():
 		conn.close()
 		return render_template('home.html',msg = "Request Accepted Successfully")
 	return render_template('register.html')
+
+@app.route('/addParent', methods = ['GET','POST'])
+def addParent():
+	if request.method == 'POST' and len(request.form) != 0:
+		conn = mysql.connector.connect(
+      host="localhost",
+      user="root",
+      database="hostel_db",
+      password="mysql"
+      )
+		name = request.form['PName']
+		relation = request.form['PRelation']
+		dob = change_date_format(request.form['PDOB'])
+		dob = date(int(dob[6:]),int(dob[3:5]),int(dob[0:2]))
+		job = request.form['PJob']
+		Phone_No = request.form['PPhone_No']
+		Legal_ID = request.form['PIdentification_No']
+		cur = conn.cursor()
+		st = 'INSERT INTO Parent VALUES(\'{}\',\'{}\',\'{}\',\'{}\',{},\'{}\');'.format (name,relation,dob,job,Phone_No,Legal_ID) 
+		cur.execute(st)
+		st = 'INSERT INTO HasParent_Guardian VALUES(\'{}\',\'{}\',\'{}\');'.format (session['username'][1:],Legal_ID,relation) 
+		cur.execute(st)
+		conn.commit()
+		cur.close()
+		conn.close()
+		return render_template('student.html')
+
+	return render_template('addParent.html')
 
 if __name__ == "__main__":
 	app.run()
