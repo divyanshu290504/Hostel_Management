@@ -95,3 +95,6 @@ alter table HasParent_Guardian
 add foreign key(Hostelite_ID) references Hostelite(Hostel_ID);
 alter table HasParent_Guardian 
 add foreign key(ID_Parent) references Parent(Identification_No);
+
+insert into accounts values(NULL,'h1','h1','h1@gmail.com');
+insert into accounts values(NULL,'a1','a1','a1@gmail.com');
