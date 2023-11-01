@@ -4,16 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
-    <link rel="stylesheet" href="../static/design.css">
+    <link rel="stylesheet" href="../static/student.css">
 </head>
 <body>
-    <script src="homeScript.js"></script>
     <div class="navbar">
-        <div class="logo"><img src="PESU-new-logo.png" alt=""></div>
+        <div class="logo"><img src="../static/new.png" alt=""></div>
         <div id="nav-text">HOSTEL MANAGEMENT</div> 
         <a href="{{ url_for('logout') }}"><button class="btn">Logout</button></a>
     </div>
-    <body></br></br></br></br></br>
+    <div id="addParent">
+        <a href="{{ url_for('addParent') }}"><button class="btn"> Add Parent </button>
+            
+        </a>
+    </div>
+    </br></br></br></br></br>
 		<div align="center">
 		<div align="center" class="border">
 			<div class="header">
@@ -25,6 +29,5 @@
 				</h1></br></br></br>
 		</div>
 		</div>
-	</body>
 </body>
 </html>
