@@ -153,5 +153,19 @@ def addParent():
 
 	return render_template('addParent.html')
 
+@app.route('/viewRequests', methods = ['GET','POST'])
+def viewRequests():
+	db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="mysql",
+    database="hostel_db"
+	)
+	cursor = db.cursor()
+	cursor.execute('SELECT Name FROM hostelite')
+	data = cursor.fetchall()
+
+	return render_template('viewRequests.html',data=data)
+
 if __name__ == "__main__":
 	app.run()
