@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
-    <link rel="stylesheet" href="../static/design.css">
+    <link rel="stylesheet" href="../static/admin.css">
 </head>
 <body>
     <script src="homeScript.js"></script>
     <div class="navbar">
-        <div class="logo"><img src="PESU-new-logo.png" alt=""></div>
+        <div class="logo"><img src="../static/new.png" alt=""></div>
         <div id="nav-text">HOSTEL MANAGEMENT</div>
         <a href="{{ url_for('logout') }}"><button class="btn">Logout</button></a>   
+    </div>
+    <div>
+        <a href="{{ url_for('viewRequests') }}"><button class="btn">View requests</button></a>
     </div>
     <body></br></br></br></br></br>
 		<div align="center">
