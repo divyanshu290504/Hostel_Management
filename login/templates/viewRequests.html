@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../static/viewRequests.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo"><img src="../static/new.png" alt=""></div>
+        <div id="nav-text">HOSTEL MANAGEMENT</div>
+        <p>Admin Name here</p>
+    </div>
+    <div class="values">
+        <div class="names">
+            {% for name in data %}
+                <div class="name-item">{{ name[0] }}</div>
+            {% endfor %}
+        </div>
+        <div class="details">hwllo</div>
+    </div>
+</body>
+</html>
