@@ -1,70 +1,123 @@
-html,body {
+html, body {
     height: 100%;
     margin: 0;
 }
 
 body {
     background-image: linear-gradient(rgb(4, 4, 172), white);
-    background-size: 100% 100%; /* To cover the entire viewport */
+    background-size: 100% 100%;
+    background-attachment: fixed;
+    overflow-y: auto;
 }
 
-.navbar{
+.navbar {
     height: 11%;
-    background-image: linear-gradient(lightblue,grey);
+    background-image: linear-gradient(lightblue, grey);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.logo {
+    display: inline;
+}
+
+#nav-text {
+    font-size: 30px;
+}
+
+p {
+    font-weight: bolder;
+    font-size: 20px;
+}
+
+.values {
+    display: flex;
+    height: 89%;
+    overflow: auto;
+}
+
+.names {
+    margin: 0;
+    width: 20%;
+    overflow-y: scroll;
+    background-color: blue;
+    padding: 20px;
+}
+
+.details {
+    margin: 0;
+    width: 80%;
+    background-color: green;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+h2 {
+    color: white;
+    font-size: 24px;
+}
+
+.name-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: pink;
+    margin: 0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 10px;
+    flex-direction: column;
+}
+
+.name-item:hover {
+    background-color: red;
+}
+
+.details-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.logo{
-    padding-left: 10px;
-    padding-top: 9px;
-    display: inline;
-}
-
-.btn{
-    border-radius: 30px;
-    height: 50px;
-    margin-right: 10px;
+.accept-request-btn {
     background-color: skyblue;
-    padding: 10px;
-    font-weight: bold;
     border: 2px solid black;
+    /* border-radius: 30px; */
+    padding: 10px 10px;
+    margin:10px;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
+}
+.reject-request-btn {
+    background-color: skyblue;
+    border: 2px solid black;
+    /* border-radius: 30px; */
+    padding: 10px 10px;
+    margin:10px;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-#nav-text{
-    font-size: 30px;
+.buttons{
+    display: flex;
     
 }
-p{
-    margin-right: 10px;
-    font-weight: bolder;
-    font-size: 20px;
-}
-.values{
+
+/* Add these CSS class definitions to your existing CSS file */
+.details-columns {
     display: flex;
-    height: 89%;
+    justify-content: space-between;
 }
-.names{
-    margin: 0;
-    width: 20%;
-    overflow-y: scroll;
-    background-color: blue ;
-}
-.details{
-    margin: 0;
-    width: 80%;
-    background-color: green;
-}
-.name-item{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 35px;
-    background-color: pink;
-    margin: 0;
-}
-.name-item:hover {
-    background-color: red;
-    /* Your hover styles here */
+
+.details-column {
+    width: 50%; /* Adjust the width as needed to create even columns */
+    padding: 10px;
+    background-color: 	rgb(173,216,230); /* Set the background color for each column */
+    border: 1px solid #ddd; /* Add a border to separate the columns */
+    margin: 5px; /* Add margin to separate columns from content */
 }
