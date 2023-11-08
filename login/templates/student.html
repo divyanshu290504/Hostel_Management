@@ -8,15 +8,13 @@
 </head>
 <body>
     <div class="navbar">
-        <div class="logo"><img src="../static/new.png" alt=""></div>
+        <div class="logo"><a href="{{url_for('home')}}"><img src="../static/new.png" alt=""></a></div>
         <div id="nav-text">HOSTEL MANAGEMENT</div> 
         <a href="{{ url_for('logout') }}"><button class="btn">Logout</button></a>
     </div>
     <div id="addParent">
-        <a href="{{ url_for('addParent') }}"><button class="btn"> Add Parent </button>
-            
-        </a>
-    </div>
+        <a href="{{ url_for('addParent') }}"><button class="btn"> Add Parent </button></a>
+    </div>    
     </br></br></br></br></br>
 		<div align="center">
 		<div align="center" class="border">
@@ -24,7 +22,7 @@
 				<h1 class="word">Index</h1>
 			</div></br></br></br>
 				<h1 class="bottom">
-					Hi {{session.username}}!!</br></br> Welcome to the index page...</br>
+					Hi {{session.name}}!!</br></br> Welcome to the index page...</br>
                     Logged in as {{session.person}}				 
 				</h1></br></br></br>
 		</div>
