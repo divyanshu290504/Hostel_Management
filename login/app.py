@@ -31,8 +31,7 @@ def login():
 		cur.execute(st)
 		account = cur.fetchone()
 		conn.commit()
-		cur.close()
-		conn.close()
+		
 		print(account)
 		if account:
 			session['loggedin'] = True
@@ -45,10 +44,22 @@ def login():
 			else:
 				msg = 'Logged in successfully as hostelite!'
 				session['person'] = 'hostelite'
+				cur.execute('SELECT name from hostelite where Hostel_ID = \'{}\''.format(account[1][1:]))
+				session['name'] = cur.fetchone()[0]
+				cur.close()
+				conn.close()
 				return render_template('student.html',msg=msg)
 		else:
 			msg = 'Incorrect username / password !'
 	return render_template('login.html', msg = msg)
+
+@app.route('/admin')
+def admin():
+	return render_template('admin.html')
+
+@app.route('/student')
+def student():
+	return render_template('student.html')
 
 @app.route('/logout')
 def logout():
@@ -96,10 +107,12 @@ def register():
 		Phone_No = request.form['PPhone_No']
 		Legal_ID = request.form['PIdentification_No']
 
-		st = 'INSERT INTO Parent VALUES(\'{}\',\'{}\',\'{}\',\'{}\',{},\'{}\');'.format (name,relation,dob,job,Phone_No,Legal_ID) 
-		cur.execute(st)
+		
 		st = 'INSERT INTO HasParent_Guardian VALUES(\'{}\',\'{}\',\'{}\');'.format (HostelID,Legal_ID,relation) 
 		cur.execute(st)
+		st = 'INSERT INTO Parent VALUES(\'{}\',\'{}\',\'{}\',\'{}\',{},\'{}\');'.format (name,relation,dob,job,Phone_No,Legal_ID) 
+		cur.execute(st)
+
 		name = request.form['LName']
 		House_Details = request.form['LHouse_Details']
 		City = request.form['LCity']
@@ -113,9 +126,10 @@ def register():
 		Legal_ID = request.form['LIdentification_No']
 		relation = request.form['LRelation']
 		
-		st = 'INSERT INTO Local_Guardian VALUES(\'{}\',\'{}\',\'{}\',\'{}\',{},\'{}\');'.format (name,Legal_ID,dob,job,Phone_No,gender) 
-		cur.execute(st)
+		
 		st = 'INSERT INTO Has_LG VALUES(\'{}\',\'{}\',\'{}\');'.format(HostelID,Legal_ID,relation)
+		cur.execute(st)
+		st = 'INSERT INTO Local_Guardian VALUES(\'{}\',\'{}\',\'{}\',\'{}\',{},\'{}\');'.format (name,Legal_ID,dob,job,Phone_No,gender) 
 		cur.execute(st)
 		st = 'INSERT INTO Local_Guardian_Addr VALUES(\'{}\',\'{}\',\'{}\',\'{}\',{});'.format (Legal_ID,House_Details,State,City,Pincode) 
 		cur.execute(st)
@@ -142,9 +156,9 @@ def addParent():
 		Phone_No = request.form['PPhone_No']
 		Legal_ID = request.form['PIdentification_No']
 		cur = conn.cursor()
-		st = 'INSERT INTO Parent VALUES(\'{}\',\'{}\',\'{}\',\'{}\',{},\'{}\');'.format (name,relation,dob,job,Phone_No,Legal_ID) 
-		cur.execute(st)
 		st = 'INSERT INTO HasParent_Guardian VALUES(\'{}\',\'{}\',\'{}\');'.format (session['username'][1:],Legal_ID,relation) 
+		cur.execute(st)
+		st = 'INSERT INTO Parent VALUES(\'{}\',\'{}\',\'{}\',\'{}\',{},\'{}\');'.format (name,relation,dob,job,Phone_No,Legal_ID) 
 		cur.execute(st)
 		conn.commit()
 		cur.close()
@@ -162,10 +176,138 @@ def viewRequests():
     database="hostel_db"
 	)
 	cursor = db.cursor()
-	cursor.execute('SELECT Name FROM hostelite')
+	cursor.execute('SELECT Name FROM hostelite where Hostel_Request_Status=\'0\'')
 	data = cursor.fetchall()
 
 	return render_template('viewRequests.html',data=data)
 
+@app.route('/get_details', methods=['POST'])
+def get_details():
+	db = mysql.connector.connect(
+	host="localhost",
+    user="root",
+    password="mysql",
+    database="hostel_db"
+	)
+	name = request.form.get('name')
+	
+    # Fetch data from the hostelite table
+	cursor = db.cursor(buffered=True)
+	cursor.execute('SELECT * FROM hostelite WHERE Name = %s', (name,))
+	hostelite_data = cursor.fetchone()
+
+    # Fetch data from the hostelite_addr table
+	cursor.execute('SELECT * FROM hostelite_addr WHERE Hostelite_ID = %s', (hostelite_data[0],))
+	hostelite_addr_data = cursor.fetchone()
+
+    # Fetch data from the HasParent_Guardian table
+	cursor.execute('SELECT * FROM HasParent_Guardian WHERE Hostelite_ID = %s', (hostelite_data[0],))
+	has_parent_guardian_data = cursor.fetchone()
+
+    # Fetch data from the Parent table
+	cursor.execute('SELECT * FROM Parent WHERE Identification_No = %s', (has_parent_guardian_data[1],))
+	parent_data = cursor.fetchone()
+
+    # Fetch data from the Has_LG table
+	cursor.execute('SELECT * FROM Has_LG WHERE Hostel_ID = %s', (hostelite_data[0],))
+	has_lg_data = cursor.fetchone()
+
+    # Fetch data from the Local_Guardian table
+	cursor.execute('SELECT * FROM Local_Guardian WHERE Identification_No = %s', (has_lg_data[1],))
+	local_guardian_data = cursor.fetchone()
+
+    # Fetch data from the Local_Guardian_Addr table
+	cursor.execute('SELECT * FROM Local_Guardian_Addr WHERE LG_ID = %s', (has_lg_data[1],))
+	local_guardian_addr_data = cursor.fetchone()
+
+	cursor.close()
+
+    # Format the details as HTML with CSS classes
+	details_html = """
+    <div class="details">
+        <h2>Details for {}</h2>
+        <div class="details-columns">
+            <div class="details-column">
+                <p>Hostelite Name: {}</p>
+                <p>Hostelite Phone: {}</p>
+                <p>SRN: {}</p>
+                <!-- Add more hostelite details here -->
+            </div>
+            <div class="details-column">
+                <h3>Address Details</h3>
+                <p>House Details: {}</p>
+                <p>City: {}</p>
+                <p>State: {}</p>
+                <p>Pincode: {}</p>
+                <!-- Add more address details here -->
+            </div>
+        </div>
+        <div class="details-columns">
+            <div class="details-column">
+                <p>Parent Name: {}</p>
+				<p>Relation: {}</p>
+				<p>Job: {}</p>
+				<p>Phone number: {}</p>
+                <!-- Add more parent details here -->
+            </div>
+            <div class="details-column">
+                <p>Local Guardian Name: {}</p>
+				<p>Relation:{}</p>
+                <p>House Details: {}</p>
+                <p>City: {}</p>
+                <p>State: {}</p>
+                <p>Pincode: {}</p>
+                <!-- Add more local guardian details here -->
+            </div>
+        </div>
+    </div>
+    """.format(
+        name,
+        hostelite_data[1], hostelite_data[2], hostelite_data[3], hostelite_addr_data[1], hostelite_addr_data[3], hostelite_addr_data[2], hostelite_addr_data[4],
+        parent_data[0],parent_data[1],parent_data[3],parent_data[4],
+        local_guardian_data[0], has_lg_data[2],local_guardian_addr_data[1], local_guardian_addr_data[3], local_guardian_addr_data[2], local_guardian_addr_data[4]
+    )
+	return details_html
+
+@app.route('/accept_request', methods=['POST'])
+def accept_request():
+	db = mysql.connector.connect(
+		host="localhost",
+		user="root",
+		password="mysql",
+		database="hostel_db"
+	)
+	name = request.form.get('name')
+	print(name)
+    # Fetch data from the hostelite table
+	cursor = db.cursor(buffered=True)
+	cursor.execute('UPDATE hostelite SET Hostel_Request_Status = \'1\' WHERE Name = %s', (name,))
+	cursor.execute('SELECT Hostel_ID,SRN from Hostelite WHERE Name=%s and Hostel_Request_Status = \'1\'',(name,))
+	id = cursor.fetchone()
+	cursor.execute('INSERT INTO accounts VALUES(NULL,\'{}\',\'{}\',\'{}\')'.format('h'+str(id[0]),'h'+str(id[0]),str(id[1])+'@pesu.pes.edu'))
+	db.commit()
+	cursor.close()
+
+	return "Request accepted successfully"  # You can customize this response message
+
+
+@app.route('/reject_request', methods=['POST'])
+def reject_request():
+	db = mysql.connector.connect(
+		host="localhost",
+		user="root",
+		password="mysql",
+		database="hostel_db"
+	)
+	name = request.form.get('name')
+	print(name)
+    # Fetch data from the hostelite table
+	cursor = db.cursor(buffered=True)
+	cursor.execute('DELETE FROM hostelite WHERE Name = %s', (name,))
+
+	db.commit()
+	cursor.close()
+	return "Request rejected and entry deleted"
+
 if __name__ == "__main__":
-	app.run()
+	app.run(debug=True)
