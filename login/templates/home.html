@@ -8,11 +8,47 @@
 </head>
 <body>
     <div class="navbar">
-        <div class="logo"><img src="../static/new.png" alt=""></div>
+        <div class="logo">
+            <a href="{{ url_for('home') }}">
+                <img src="../static/new.png" alt="">
+            </a>
+        </div>
         <div id="nav-text">HOSTEL MANAGEMENT</div>
         <div>
-            <a href="{{ url_for('login') }}" target="_blank"><button class="btn">Login for Student</button></a>    
-            <a href="{{ url_for('register')}}" target="_blank"><button class="btn">Register for Hostel</button></a>
+            <a href="{{ url_for('login') }}" target="_blank"><button class="btn">Login</button></a>
+            <a href="{{ url_for('register') }}" target="_blank"><button class="btn">Register for Hostel</button></a>
         </div>
     </div>
+    <div class="carousel">
+        <img id="carousel-image" src="../static/c1.jpeg" alt="">
+        <span class="carousel-control prev" onclick="prevImage()">&#10094;</span>
+        <span class="carousel-control next" onclick="nextImage()">&#10095;</span>
+    </div>
+    <div class="hostel-details">
+        <h2>Welcome to Our Hostel</h2>
+        <p>Experience a comfortable and welcoming stay at our hostel. We offer a safe and friendly environment for all our residents. Our facilities include well-furnished rooms, a dedicated support team, and a variety of amenities to make your stay enjoyable.</p>
+    </div>
+
+    <script>
+        var currentImageIndex = 0;
+        var images = ["c1.jpeg", "c2.jpeg", "c3.jpeg", "c4.jpeg", "c5.jpg", "c6.jpeg", "c7.jpeg"];
+
+        function updateImage() {
+            document.getElementById("carousel-image").src = "../static/" + images[currentImageIndex];
+        }
+
+        function prevImage() {
+            currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+            updateImage();
+        }
+
+        function nextImage() {
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            updateImage();
+        }
+
+        // Start the carousel
+        setInterval(nextImage, 5000); // Change image every 5 seconds
+    </script>
 </body>
+</html>
