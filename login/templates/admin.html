@@ -9,7 +9,7 @@
 <body>
     <script src="homeScript.js"></script>
     <div class="navbar">
-        <div class="logo"><img src="../static/new.png" alt=""></div>
+        <div class="logo"><a href="{{url_for('home')}}"><img src="../static/new.png" alt=""></a></div>
         <div id="nav-text">HOSTEL MANAGEMENT</div>
         <a href="{{ url_for('logout') }}"><button class="btn">Logout</button></a>   
     </div>
