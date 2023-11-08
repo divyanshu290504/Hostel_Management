@@ -3,22 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Hostel Management</title>
     <link rel="stylesheet" href="../static/viewRequests.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".name-item").click(function() {
+                var name = $(this).text();
+                $(".name-item").removeClass("selected");
+                $(this).addClass("selected");
+                $.ajax({
+                    type: "POST",
+                    url: "/get_details",
+                    data: { name: name },
+                    success: function(response) {
+                        $(".details").html(response);
+                    }
+                });
+            });
+            $(".accept-request-btn").click(function() {
+                var name = $(this).data("name");
+                $.ajax({
+                    type: "POST",
+                    url: "/accept_request",
+                    data: { name: name },
+                    success: function(response) {
+                        location.reload();
+                    }
+                });
+            });
+            $(".reject-request-btn").click(function() {
+                var name = $(this).data("name");
+                $.ajax({
+                    type: "POST",
+                    url: "/reject_request",
+                    data: { name: name },
+                    success: function(response) {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="navbar">
-        <div class="logo"><img src="../static/new.png" alt=""></div>
+        <div class="logo"><a href="{{url_for('home')}}"><img src="../static/new.png" alt=""></a></div>
         <div id="nav-text">HOSTEL MANAGEMENT</div>
-        <p>Admin Name here</p>
+        <p><a href="{{url_for('admin')}}">Admin: {{session.username}}</a></p>
     </div>
     <div class="values">
         <div class="names">
-            {% for name in data %}
-                <div class="name-item">{{ name[0] }}</div>
-            {% endfor %}
+            <h2>Pending Requests</h2>
+            <ul class="names-list">
+                {% for name in data %}
+                    <li class="name-item" data-name="{{ name[0] }}">{{ name[0] }}</li>
+                    <div class="buttons">
+                        <button class="accept-request-btn" data-name="{{ name[0] }}">Accept Request</button>
+                        <button class="reject-request-btn" data-name="{{ name[0] }}">Reject Request</button>
+                    </div>
+                {% endfor %}
+            </ul>
         </div>
-        <div class="details">hwllo</div>
+        <div class="details">
+            <h2>Hostelite Details</h2>
+            <div class="details-content">
+                <div class="details-text"></div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
