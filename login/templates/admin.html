@@ -1,33 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
     <link rel="stylesheet" href="../static/admin.css">
+    <script>
+        $(document).ready(function () {
+            // Search button click event
+            $(".btn-search").click(function () {
+                const input = document.getElementById('searchInput');
+                var name = input.value;
+                $.ajax({
+                    type: "POST",
+                    url: "/search_details",
+                    data: { name: name },
+                    success: function (response) {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
 </head>
+
 <body>
     <script src="homeScript.js"></script>
     <div class="navbar">
         <div class="logo"><a href="{{url_for('home')}}"><img src="../static/new.png" alt=""></a></div>
         <div id="nav-text">HOSTEL MANAGEMENT</div>
-        <a href="{{ url_for('logout') }}"><button class="btn">Logout</button></a>   
+        <form method="POST" action="{{ url_for('search_details') }}">
+            <div class="search-box">
+                <button type="submit" class="btn-search">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                </button>
+                <input type="text" name="name" class="input-search" placeholder="Search Student">
+            </div>
+        </form>        
+        <a href="{{ url_for('logout') }}"><button class="btn">Logout</button></a>
     </div>
     <div>
         <a href="{{ url_for('viewRequests') }}"><button class="btn">View requests</button></a>
+        <a href="{{ url_for('viewLeaveRequests') }}"><button class="btn">View Leave Requests</button></a>
     </div>
+
     <body></br></br></br></br></br>
-		<div align="center">
-		<div align="center" class="border">
-			<div class="header">
-				<h1 class="word">Index</h1>
-			</div></br></br></br>
-				<h1 class="bottom">
-					Hi {{session.username}}!!</br></br> Welcome to the index page...</br>
-                    Logged in as {{session.person}}		 
-				</h1></br></br></br>
-		</div>
-		</div>
-	</body>
+        <div align="center">
+            <div align="center" class="border">
+                <h1 class="bottom">
+                    Hi {{session.username}}!!</br></br>
+                    Logged in as {{session.person}}
+                </h1>
+            </div>
+        </div>
+        <div id="notifications" align="center">
+            {% for notification in notifications %}
+            <div class="notification">
+                <a href="{{url_for('delete_notification',id=notification[0])}}"><button>X</button></a>
+                <p>{{ notification[2] }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </body>
 </body>
+
 </html>
