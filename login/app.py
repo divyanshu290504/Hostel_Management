@@ -40,7 +40,7 @@ def login():
 			if account[1][0] == 'a':
 				msg = 'Logged in successfully as admin!'
 				session['person']='admin'
-				return render_template('admin.html',msg=msg)
+				return redirect(url_for('admin'))
 			else:
 				msg = 'Logged in successfully as hostelite!'
 				session['person'] = 'hostelite'
@@ -55,11 +55,53 @@ def login():
 
 @app.route('/admin')
 def admin():
-	return render_template('admin.html')
+	notifications=dict()
+	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	cur = conn.cursor()
+	cur.execute('SELECT * FROM notification WHERE users_concerned=\"a\";')
+	notifications = cur.fetchall()
+	return render_template('admin.html',notifications=notifications)
+
+@app.route('/delete_notification/<id>')
+def delete_notification(id):
+	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	cur = conn.cursor()
+	st = 'DELETE FROM notification where id={};'.format(id)
+	cur.execute(st)
+	conn.commit()
+	cur.close()
+	return redirect(url_for('admin'))
 
 @app.route('/student')
 def student():
 	return render_template('student.html')
+
+@app.route('/leaveApplication')
+def leave_application():
+    return render_template('leave_application.html')
+
+@app.route('/submit_leave', methods=['POST'])
+def submit_leave():
+	if request.method == 'POST':
+		conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+		reason = request.form['reason']
+		place = request.form['place']
+		arrival_datetime = request.form['arrival_datetime']
+		leaving_datetime = request.form['leaving_datetime']
+        
+		hostel_ID = session.get('username')[1:]
+        
+		cursor = conn.cursor()
+		insert_query = "INSERT INTO leave_request (Verification_Status, Reason, Place, Arrival_Datetime, Leaving_Datetime, Hostel_ID) VALUES (%s, %s, %s, %s, %s, %s)"
+		data = (0, reason, place, arrival_datetime, leaving_datetime, hostel_ID)
+		cursor.execute(insert_query, data)
+		conn.commit()
+        
+        # Redirect to a success page or anywhere you want after submission
+		return render_template('student.html',msg="Submitted Successfully")
+
+    # Handle GET requests or errors
+	return "Something went wrong."
 
 @app.route('/logout')
 def logout():
@@ -167,6 +209,93 @@ def addParent():
 
 	return render_template('addParent.html')
 
+@app.route('/viewLeaveRequests', methods = ['GET','POST'])
+def viewLeaveRequests():
+	db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="mysql",
+    database="hostel_db"
+	)
+	cursor = db.cursor()
+	cursor.execute('SELECT Hostel_ID FROM leave_request where Verification_Status=0')
+	data = cursor.fetchall()
+	if len(data) != 0:
+		cursor.execute('SELECT Name from hostelite where Hostel_ID=%s',data[0])
+		data = cursor.fetchall()
+	return render_template('viewLeaveRequests.html',data=data)
+
+@app.route('/get_leave_details',methods=['POST'])
+def get_leave_details():
+	db = mysql.connector.connect(
+	host="localhost",
+    user="root",
+    password="mysql",
+    database="hostel_db"
+	)
+	name = request.form.get('name')
+	cursor = db.cursor(buffered=True)
+	cursor.execute('SELECT * from hostelite WHERE Name=%s',(name,))
+	Hostel_ID = cursor.fetchone()
+	cursor.execute('SELECT * from leave_request WHERE Hostel_ID=%s',(Hostel_ID[0],))
+	details = cursor.fetchone()
+	reason = details[1]
+	place = details[2]
+	arrival_datetime = details[3]
+	leaving_datetime = details[4]
+	cursor.close()
+	details_html = """
+    <div class="details">
+        <h2>Details for {}</h2>
+        <div class="details-columns">
+            <div class="details-column">
+                <p>Hostelite Name: {}</p>
+				<p>Reason: {}</p>
+                <p>Place: {}</p>
+                <p>Arrival Datetime: {}</p>
+				<p>Leaving Datetime: {}</p>
+            </div>
+        </div>
+    </div>
+    """.format(
+        name,name,reason,place,arrival_datetime,leaving_datetime
+    )
+	return details_html
+
+@app.route('/accept_leave_request', methods=['POST'])
+def accept_leave_request():
+	db = mysql.connector.connect(
+		host="localhost",
+		user="root",
+		password="mysql",
+		database="hostel_db"
+	)
+	name = request.form.get('name')
+	cursor = db.cursor(buffered=True)
+	cursor.execute('SELECT * from hostelite WHERE Name=%s',(name,))
+	Hostel_ID = cursor.fetchone()
+	cursor.execute('UPDATE leave_request SET Verification_Status = 1 WHERE Hostel_ID = %s', (Hostel_ID[0],))
+	db.commit()
+	cursor.close()
+	return "Request accepted successfully" 
+
+
+@app.route('/reject_leave_request', methods=['POST'])
+def reject_leave_request():
+	db = mysql.connector.connect(
+		host="localhost",
+		user="root",
+		password="mysql",
+		database="hostel_db"
+	)
+	name = request.form.get('name')
+    
+	cursor = db.cursor(buffered=True)
+	cursor.execute('DELETE FROM leave_request WHERE Hostel_ID = %s', (name,))
+
+	db.commit()
+	cursor.close()
+	return "Request rejected and entry deleted"
 @app.route('/viewRequests', methods = ['GET','POST'])
 def viewRequests():
 	db = mysql.connector.connect(
@@ -180,6 +309,8 @@ def viewRequests():
 	data = cursor.fetchall()
 
 	return render_template('viewRequests.html',data=data)
+
+
 
 @app.route('/get_details', methods=['POST'])
 def get_details():
@@ -289,6 +420,22 @@ def accept_request():
 	cursor.close()
 
 	return "Request accepted successfully"  # You can customize this response message
+
+@app.route('/search_details',methods=["GET","POST"])
+def search_details():
+	name = request.form.get('name')
+	db = mysql.connector.connect(
+		host="localhost",
+		user="root",
+		password="mysql",
+		database="hostel_db"
+	)
+	cur = db.cursor(buffered=True)
+	print(name)
+	cur.execute("SELECT Name FROM HOSTELITE WHERE NAME LIKE %s", ('%' + name + '%',))
+	data = cur.fetchall()
+	print(data)
+	return render_template('searchdetails.html',data= data)
 
 
 @app.route('/reject_request', methods=['POST'])
