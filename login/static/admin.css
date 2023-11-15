@@ -1,6 +1,7 @@
 html,body {
     height: 100%;
     margin: 0;
+    overflow-y: auto;
 }
 
 body {
@@ -34,6 +35,86 @@ body {
 }
 
 #nav-text{
-    font-size: 30px;
-    
+    font-size: 30px;   
+}
+
+.search-box {
+    width: fit-content;
+    height: fit-content;
+    position: relative;
+  }
+  
+  .input-search {
+    height: 50px;
+    width: 50px;
+    border-style: none;
+    padding: 10px;
+    font-size: 18px;
+    letter-spacing: 2px;
+    outline: none;
+    border-radius: 25px;
+    transition: width 0.5s, border-radius 0.5s; /* Transition width and border-radius */
+    background-color: #22a6b3;
+    padding-right: 40px;
+    color: #fff;
+    width: 50px; /* Set initial width */
+  }
+  
+  .input-search::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 18px;
+    letter-spacing: 2px;
+    font-weight: 100;
+  }
+  
+  .btn-search {
+    width: 50px;
+    height: 50px;
+    border-style: none;
+    font-size: 20px;
+    font-weight: bold;
+    outline: none;
+    cursor: pointer;
+    border-radius: 50%;
+    position: absolute;
+    right: 0px;
+    color: #ffffff;
+    background-color: transparent;
+    pointer-events: painted;
+  }
+  
+  /* Trigger input field expansion on hover over .search-box or .btn-search */
+  .search-box:hover .input-search,
+  .btn-search:hover + .input-search,
+  .input-search:hover {
+    width: 300px;
+    border-radius: 0px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+#notifications {
+    margin-top: 20px;
+}
+
+.notification {
+    background-color: lightgreen;
+    border: 1px solid #d1d3e2;
+    padding: 10px;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    align-items: center;
+    width: 75%;
+}
+
+.notification p {
+    margin: 0;
+}
+
+.notification button {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
 }
