@@ -1,0 +1,6 @@
+{% for notification in notifications %}
+    <div class="notification">
+        <p>{{ notification[2] }}</p>
+        <button class="cross-btn" data-notification-id="{{ notification[0] }}">X</button>
+    </div>
+{% endfor %}

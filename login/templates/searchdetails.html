@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Management</title>
+    <link rel="stylesheet" href="../static/viewRequests.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".name-item").click(function() {
+                var name = $(this).text();
+                $(".name-item").removeClass("selected");
+                $(this).addClass("selected");
+                $.ajax({
+                    type: "POST",
+                    url: "/get_details",
+                    data: { name: name },
+                    success: function(response) {
+                        $(".details").html(response);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo"><a href="{{url_for('home')}}"><img src="../static/new.png" alt=""></a></div>
+        <div id="nav-text">HOSTEL MANAGEMENT</div>
+        <p><a href="{{url_for('admin')}}">Admin: {{session.username}}</a></p>
+    </div>
+    <div class="values">
+        <div class="names">
+            <h2>Search Details</h2>
+            <ul class="names-list">
+                {% for name in data %}
+                    <li class="name-item" data-name="{{ name[0] }}">{{ name[0] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="details">
+            <h2>Hostelite Details</h2>
+            <div class="details-content">
+                <div class="details-text"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

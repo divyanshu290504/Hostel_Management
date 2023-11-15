@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Application</title>
+    <link rel="stylesheet" href="../static/leave_application.css"> <!-- Create a CSS file for styling -->
+</head>
+<body>
+    <form action="{{ url_for('submit_leave') }}" method="post">
+        <label for="reason">Reason:</label>
+        <input type="text" id="reason" name="reason" required><br><br>
+
+        <label for="place">Place:</label>
+        <input type="text" id="place" name="place" required><br><br>
+
+        <label for="arrival_datetime">Arrival Datetime:</label>
+        <input type="datetime-local" id="arrival_datetime" name="arrival_datetime" required><br><br>
+
+        <label for="leaving_datetime">Leaving Datetime:</label>
+        <input type="datetime-local" id="leaving_datetime" name="leaving_datetime" required><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
