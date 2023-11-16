@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../static/roomAllotment.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <a href="{{ url_for('home') }}">
+                <img src="../static/new.png" alt="">
+            </a>
+        </div>
+        <div id="nav-text">HOSTEL MANAGEMENT</div>
+        <a href="{{url_for('student')}}"><div style="margin-right: 10px;">
+            Username: {{session.username}}
+        </div></a>
+    </div>
+    <div class="center">
+        <div class="form">
+            <div class="card-section">
+                {% for room in room_data %}
+                {% if (room.Block_Name == "MM" and room.No_of_Occupants < 2) or (room.Block_Name != "MM" and room.No_of_Occupants < 3) %}
+                <a href="{{url_for('selected_room',id=room.Room_No+room.Block_Name)}}"> 
+                        <div class="card">
+                            <h3>{{ room.Room_No }}</h3>
+                            <p>Block: {{ room.Block_Name }}</p>
+                            <p>Vacancy: {{ 2-room.No_of_Occupants if room.Block_Name == "MM" else 3 - room.No_of_Occupants }}</p>
+                        </div>
+                </a>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

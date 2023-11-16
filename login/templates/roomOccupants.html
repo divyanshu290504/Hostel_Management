@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Occupants</title>
+    <link rel="stylesheet" href="../static/roomOccupants.css">
+</head>
+<body>
+    <div class="center">
+        <div class="form">
+            <div class="card-section">
+                {% for room in room_data %}
+                    <div class="block-heading">{{ room[0] }}</div>
+                        <div class="card">
+                            <h3>Room No: {{ room[1] }}</h3>
+                            <p>Floor: {{ room[2] }}</p>
+                            <p>Occupants: {{ room[3] }}</p>
+                        </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
