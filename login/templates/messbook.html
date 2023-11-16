@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mess Booking</title>
+    <link rel="stylesheet" href="../static/leave_application.css"> 
+</head>
+<body>
+    <form action="{{ url_for('submit_mess') }}" method="post">
+        <label for="select">Mess Selection:</label>
+        <select id="select" name="select" required>
+            <option value="Namdhari">Namdhari</option>
+            <option value="Food Court">Food Court</option>
+            <option value="Hostel Mess">Hostel Mess</option>
+        </select><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
