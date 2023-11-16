@@ -48,7 +48,7 @@ def login():
 				session['name'] = cur.fetchone()[0]
 				cur.close()
 				conn.close()
-				return render_template('student.html',msg=msg)
+				return redirect(url_for('student',msg=msg))
 		else:
 			msg = 'Incorrect username / password !'
 	return render_template('login.html', msg = msg)
@@ -70,15 +70,86 @@ def delete_notification(id):
 	cur.execute(st)
 	conn.commit()
 	cur.close()
-	return redirect(url_for('admin'))
+	if session['person'] == 'admin':
+		return redirect(url_for('admin'))
+	else:
+		return redirect(url_for('student'))
 
 @app.route('/student')
 def student():
-	return render_template('student.html')
+	notifications=dict()
+	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	cur = conn.cursor()
+	cur.execute('SELECT * FROM notification WHERE users_concerned=\"2\";')
+	notifications = cur.fetchall()
+	msg=''
+	print(list(request.args.keys()))
+	if 'msg' in request.args:
+		msg=request.args['msg']
+	return render_template('student.html',msg=msg,notifications=notifications)
+
+@app.route('/roomAllotment')
+def roomAllotment():
+	conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        database="hostel_db",
+        password="mysql"
+    )
+	cursor = conn.cursor(dictionary=True)
+	cursor.execute('SELECT * FROM LIVES_IN WHERE hostel_id=%s',(int(session['username'][1:]),))
+	if len(cursor.fetchall()) != 0:
+		return redirect(url_for('student',msg="Room Alloted Already!"))
+	cursor.execute("SELECT Room_No, Block_Name, No_of_Occupants FROM Room")
+	room_data = cursor.fetchall()
+	print(room_data)
+	cursor.close()
+	conn.close()
+	return render_template('roomAllotment.html', room_data=room_data)
+
+@app.route('/selected_room/<id>')
+def selected_room(id):
+	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	cur = conn.cursor()
+	cur.execute('INSERT INTO LIVES_IN VALUES(%s,%s,%s)',(int(id[0:3]),id[3:],session['username'][1:]))
+	conn.commit()
+	return redirect(url_for('student',msg="Room Alloted Successfully!")) 
+	
 
 @app.route('/leaveApplication')
 def leave_application():
-    return render_template('leave_application.html')
+	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	cur = conn.cursor()
+	cur.execute('SELECT * FROM LEAVE_REQUEST WHERE hostel_id=%s',(session['username'][1:],))
+	if len(cur.fetchall()) == 0:
+		return render_template('leave_application.html')
+	else:
+		return redirect(url_for('student',msg="Leave Submitted Already!")) 
+
+
+@app.route('/messBooking')
+def messBooking():
+	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	cur = conn.cursor()
+	cur.execute('SELECT HOSTEL_ID FROM mess WHERE Month=MONTH(CURDATE()) and Year = YEAR(CURDATE());')
+	if cur.fetchone() == None:
+		return render_template('messbook.html')
+	else:
+		return redirect(url_for('student',msg="Already submitted for this month")) 
+
+@app.route('/submit_mess',methods=['POST'])
+def submit_mess():
+	if request.method == 'POST':
+		conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+		cur = conn.cursor()
+		selection = request.form['select']
+		hostel_ID = session.get('username')[1:]
+		query = "INSERT INTO MESS VALUES(%s,MONTH(CURDATE()),YEAR(CURDATE()),%s);"
+		data =(selection,hostel_ID)
+		cur.execute(query,data)
+		conn.commit()
+		return redirect(url_for('student',msg="Submitted Successfully"))
+	return redirect(url_for('student'))
 
 @app.route('/submit_leave', methods=['POST'])
 def submit_leave():
@@ -98,7 +169,7 @@ def submit_leave():
 		conn.commit()
         
         # Redirect to a success page or anywhere you want after submission
-		return render_template('student.html',msg="Submitted Successfully")
+		return redirect(url_for('student',msg="Submitted Successfull"))
 
     # Handle GET requests or errors
 	return "Something went wrong."
@@ -455,6 +526,33 @@ def reject_request():
 	db.commit()
 	cursor.close()
 	return "Request rejected and entry deleted"
+
+@app.route('/showRoomDetails')
+def showRoomDetails():
+	db = mysql.connector.connect(
+		host="localhost",
+		user="root",
+		password="mysql",
+		database="hostel_db"
+	)
+	cursor = db.cursor(buffered=True)
+	cursor.execute('CALL GetRoomOccupants(\'MM\');')
+	a = cursor.fetchall()
+	cursor.close()
+	db.close()
+	db = mysql.connector.connect(
+		host="localhost",
+		user="root",
+		password="mysql",
+		database="hostel_db"
+	)
+	cursor = db.cursor(buffered=True)
+	cursor.execute('CALL GetRoomOccupants(\'NB\');')
+	b = cursor.fetchall()
+	print(a+b)
+	cursor.close()
+	db.close()
+	return render_template('roomOccupants.html',room_data=a+b)
 
 if __name__ == "__main__":
 	app.run(debug=True)
