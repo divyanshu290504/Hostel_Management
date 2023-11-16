@@ -13,20 +13,29 @@
         <a href="{{ url_for('logout') }}"><button class="btn">Logout</button></a>
     </div>
     <div id="addParent">
+        <a href="{{ url_for('roomAllotment') }}"><button class="btn">Room Allotment</button></a>
         <a href="{{ url_for('addParent') }}"><button class="btn"> Add Parent </button></a>
         <a href="{{ url_for('leave_application') }}"><button class="btn">Apply for Leave</button></a>
+        <a href="{{url_for('messBooking')}}"><button class="btn">Mess Selection</button></a>
     </div>    
-    </br></br></br></br></br>
+    </br></br></br>
 		<div align="center">
 		<div align="center" class="border">
-			<div class="header">
-				<h1 class="word">Index</h1>
-			</div></br></br></br>
+			</div></br>
 				<h1 class="bottom">
-					Hi {{session.name}}!!</br></br> Welcome to the index page...</br>
+					Hi {{session.name}}!!</br></br>
                     Logged in as {{session.person}}				 
 				</h1></br></br></br>
+                <p class="notif">{{msg}}</p>
 		</div>
 		</div>
+        <div id="notifications" align="center">
+            {% for notification in notifications %}
+            <div class="notification">
+                <a href="{{url_for('delete_notification',id=notification[0])}}"><button>X</button></a>
+                <p>{{ notification[2] }}</p>
+            </div>
+            {% endfor %}
+        </div>
 </body>
 </html>
