@@ -1,0 +1,51 @@
+/* Add this to your CSS file */
+
+body {
+    background-image: linear-gradient(rgb(4, 4, 172), white); /* Choose your desired background color */
+    margin: 0;
+    padding: 0;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+}
+
+.form {
+    width: 80%;
+    margin-top: 20px; /* Adjust the margin to create space from the top */
+}
+
+.card-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.block-heading {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #fff;
+}
+
+.card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px;
+    width: 300px;
+    background-color: #fff; /* Choose your desired card background color */
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #007bff;
+}
