@@ -25,7 +25,7 @@ body {
     padding: 10px;
     font-weight: bold;
     border: 2px solid black;
-    width: 100px;
+    width: 200px;
 }
 #nav-text{
     font-size: 30px;
@@ -33,4 +33,53 @@ body {
 }
 #addParent{
     padding: 20px;
+}
+
+/* Add this to your CSS file */
+
+.notif {
+    background-color: red;
+    color: whitesmoke;
+    padding: 10px;
+    margin: 10px 0;
+    width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    animation: fadeOut 5s forwards;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+#notifications {
+    margin-top: 20px;
+}
+
+.notification {
+    background-color: lightgreen;
+    border: 1px solid #d1d3e2;
+    padding: 10px;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    align-items: center;
+    width: 75%;
+}
+
+.notification p {
+    margin: 0;
+}
+
+.notification button {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
 }
