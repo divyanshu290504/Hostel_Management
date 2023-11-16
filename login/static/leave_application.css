@@ -19,6 +19,18 @@ form {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Add this to your leave_application.css file or create a new CSS file */
+
+select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
+
 /* Style form elements */
 label {
     display: block;
