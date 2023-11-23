@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Occupants</title>
+    <link rel="stylesheet" href="../static/currentOccupants.css"> <!-- Create a CSS file for styling -->
+</head>
+<body>
+    <div class="center">
+        <div class="occupants-list">
+            <h2>Current Occupants</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Hostel ID</th>
+                    <th>Room Number</th>
+                    <th>Block Name</th>
+                </tr>
+                {% for row in data %}
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</body>
+</html>
