@@ -57,10 +57,10 @@
             <h2>Pending Requests</h2>
             <ul class="names-list">
                 {% for name in data %}
-                    <li class="name-item" data-name="{{ name[0] }}">{{ name[0] }}</li>
+                    <li class="name-item" data-name="{{ name[0][1] }}">{{ name[0][1] }}</li>
                     <div class="buttons">
-                        <button class="accept-request-btn" data-name="{{ name[0] }}">Accept Request</button>
-                        <button class="reject-request-btn" data-name="{{ name[0] }}">Reject Request</button>
+                        <button class="accept-request-btn" data-name="{{ name[0][0] }}">Accept Request</button>
+                        <button class="reject-request-btn" data-name="{{ name[0][0] }}">Reject Request</button>
                     </div>
                 {% endfor %}
             </ul>
