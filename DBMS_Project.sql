@@ -127,6 +127,118 @@ alter table Local_Guardian add foreign key(Identification_No) references has_lg(
 alter table parent add foreign key(Identification_No) references hasParent_Guardian(ID_Parent) on delete cascade;
 
 
+create table notification(id auto-increment, user_concerned varchar(5), info varchar(10), dateofnotif datetime);
+drop trigger if exists notif_new_student;
+DELIMITER //
+CREATE TRIGGER notif_new_student
+after insert on hostelite
+for each row
+begin
+	INSERT INTO notification values(NULL,"a","New request for hostel received!",curdate());
+end;
+//
+delimiter ;
+
+drop trigger if exists notif_leave_request;
+DELIMITER //
+CREATE TRIGGER notif_leave_request
+after insert on leave_request
+for each row
+begin
+	INSERT INTO notification values(NULL,"a","New leave request received!",curdate());
+end;
+//
+delimiter ;
+
+drop trigger if exists notif_leave_req_update;
+DELIMITER //
+CREATE TRIGGER notif_leave_req_update
+before update on leave_request
+for each row
+begin
+	IF NEW.verification_status = 1 AND OLD.verification_status != 1 THEN
+		INSERT INTO notification values(NULL,NEW.Hostel_ID,"Leave Request Accepted!",curdate());
+	end if;
+end;
+//
+delimiter ;
+
+drop trigger if exists notif_leave_req_update;
+DELIMITER //
+CREATE TRIGGER notif_leave_req_update
+after delete on leave_request
+for each row
+begin
+	INSERT INTO notification values(NULL,OLD.Hostel_ID,"Leave Request Rejected!",curdate());
+end;
+//
+delimiter ;
+
+create table lives_in(room_no varchar(20), block_name varchar(20), hostel_id int,primary key(hostel_id));
+alter table lives_in add constraint foreign key(hostel_id) references hostelite(hostel_id);
+
+drop trigger if exists room_occupant;
+DELIMITER //
+CREATE TRIGGER room_occupant
+after insert on lives_in
+for each row
+begin
+update room set No_of_Occupants=No_of_Occupants+1 where Room_No=NEW.room_no and Block_Name=NEW.block_name;
+end;
+//
+delimiter ;
+
+
+drop procedure if exists GetRoomOccupants;
+DELIMITER //
+CREATE PROCEDURE GetRoomOccupants(IN blockName VARCHAR(255))
+BEGIN
+    SELECT
+        r.block_name,
+        r.room_no,
+        r.floor,
+        GROUP_CONCAT(h.name ORDER BY h.name SEPARATOR ',') AS occupants
+    FROM
+        room r
+    LEFT JOIN lives_in li ON r.room_no = li.room_no AND r.block_name = li.block_name
+    LEFT JOIN hostelite h ON li.hostel_id = h.hostel_id
+    WHERE
+        r.block_name = blockName
+    GROUP BY
+        r.block_name, r.room_no
+    HAVING
+        r.no_of_occupants != 0; 
+END //
+DELIMITER ;
+
+ALTER TABLE room
+ADD CONSTRAINT check_occupants_limit
+CHECK (
+    (block_name = 'MM' AND no_of_occupants <= 2) OR
+    (block_name = 'NB' AND no_of_occupants <= 3)
+);
+
+insert into room values("101","NB",1,0,NULL,NULL);
+insert into room values("102","NB",1,0,NULL,NULL);
+insert into room values("103","NB",1,0,NULL,NULL);
+insert into room values("201","NB",2,0,NULL,NULL);
+insert into room values("202","NB",2,0,NULL,NULL);
+insert into room values("203","NB",2,0,NULL,NULL);
+insert into room values("301","NB",3,0,NULL,NULL);
+insert into room values("302","NB",3,0,NULL,NULL);
+insert into room values("303","NB",3,0,NULL,NULL);
+insert into room values("401","NB",4,0,NULL,NULL);
+insert into room values("402","NB",4,0,NULL,NULL);
+insert into room values("403","NB",4,0,NULL,NULL);
+insert into room values("404","NB",4,0,NULL,NULL);
+insert into room values("101","MM",1,0,NULL,NULL);
+insert into room values("102","MM",1,0,NULL,NULL);
+insert into room values("103","MM",1,0,NULL,NULL);
+insert into room values("201","MM",2,0,NULL,NULL);
+insert into room values("202","MM",2,0,NULL,NULL);
+insert into room values("203","MM",2,0,NULL,NULL);
+
+
 -- Hostelite 1
 INSERT INTO hostelite VALUES (NULL, 'John Doe', '1234567890', 'PES1UG21CS001', '2000-01-01', '123456789012', '0');
 INSERT INTO hostelite_addr VALUES (LAST_INSERT_ID(), '123 Main St', 'Sample State', 'Sample City', '123456');
@@ -216,3 +328,4 @@ INSERT INTO Parent VALUES ('Daniel White', 'Father', '1977-10-10', 'Sample Job',
 INSERT INTO Has_LG VALUES (LAST_INSERT_ID(), '916791679158', 'Guardian');
 INSERT INTO Local_Guardian VALUES ('Sophia Smith', '916791679158', '1990-10-10', 'Sample Job', '9876543219', 'Female');
 INSERT INTO Local_Guardian_Addr VALUES ('916791679158', '456 Fir St', 'LG State', 'LG City', '852964');
+
