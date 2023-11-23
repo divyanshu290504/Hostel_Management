@@ -9,6 +9,39 @@ app.secret_key = 'your secret key'
 import re
 def change_date_format(dt):
 	return re.sub(r'(\d{4})-(\d{1,2})-(\d{1,2})', '\\3-\\2-\\1', dt)
+db_params = {
+    'host': 'localhost',
+    'user': 'hostel_admin',
+    'database': 'hostel_db'
+}
+def move_to_backup(hostel_id):
+	try:
+	    # Connect to the database
+		connection = mysql.connector.connect(**db_params)
+		cursor = connection.cursor(dictionary=True)
+
+        # Retrieve data from Hostelite table
+		sql_select = "SELECT * FROM Hostelite WHERE Hostel_ID = %s"
+		cursor.execute(sql_select, (hostel_id,))
+		result = cursor.fetchone()
+
+		if result:
+            # Insert data into Backup table
+			sql_insert = "INSERT INTO Backup (Hostel_ID, Name, Phone_No, SRN, DOB, Legal_ID) VALUES (%s, %s, %s, %s, %s, %s)"
+			cursor.execute(sql_insert, (result['Hostel_ID'], result['Name'], result['Phone_No'], result['SRN'], result['DOB'], result['Legal_ID']))
+
+            # Delete data from Hostelite table
+			sql_delete = "DELETE FROM Hostelite WHERE Hostel_ID = %s"
+			cursor.execute(sql_delete, (hostel_id,))
+
+			cursor.execute("DELETE FROM ACCOUNTS WHERE username=%s",("h"+str(hostel_id),))
+            # Commit the changes
+			connection.commit()
+
+	finally:
+        # Close the database connection
+		cursor.close()
+		connection.close()
 
 @app.route('/')
 def home():
@@ -20,9 +53,8 @@ def login():
 	if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
 		conn = mysql.connector.connect(
       host="localhost",
-      user="root",
-      database="hostel_db",
-      password="mysql"
+      user="hostel_admin",
+      database="hostel_db"
       )
 		username = request.form['username']
 		password = request.form['password']
@@ -56,7 +88,7 @@ def login():
 @app.route('/admin')
 def admin():
 	notifications=dict()
-	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	conn = mysql.connector.connect(host="localhost",user="hostel_admin",database="hostel_db")
 	cur = conn.cursor()
 	cur.execute('SELECT * FROM notification WHERE users_concerned=\"a\";')
 	notifications = cur.fetchall()
@@ -64,7 +96,7 @@ def admin():
 
 @app.route('/delete_notification/<id>')
 def delete_notification(id):
-	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	conn = mysql.connector.connect(host="localhost",user="hostel_admin",database="hostel_db")
 	cur = conn.cursor()
 	st = 'DELETE FROM notification where id={};'.format(id)
 	cur.execute(st)
@@ -78,9 +110,9 @@ def delete_notification(id):
 @app.route('/student')
 def student():
 	notifications=dict()
-	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	conn = mysql.connector.connect(host="localhost",user="hostel_admin",database="hostel_db")
 	cur = conn.cursor()
-	cur.execute('SELECT * FROM notification WHERE users_concerned=\"2\";')
+	cur.execute('SELECT * FROM notification WHERE users_concerned=%s;',(session['username'][1:],))
 	notifications = cur.fetchall()
 	msg=''
 	print(list(request.args.keys()))
@@ -92,9 +124,8 @@ def student():
 def roomAllotment():
 	conn = mysql.connector.connect(
         host="localhost",
-        user="root",
-        database="hostel_db",
-        password="mysql"
+        user="hostel_admin",
+        database="hostel_db"
     )
 	cursor = conn.cursor(dictionary=True)
 	cursor.execute('SELECT * FROM LIVES_IN WHERE hostel_id=%s',(int(session['username'][1:]),))
@@ -109,7 +140,7 @@ def roomAllotment():
 
 @app.route('/selected_room/<id>')
 def selected_room(id):
-	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	conn = mysql.connector.connect(host="localhost",user="hostel_admin",database="hostel_db")
 	cur = conn.cursor()
 	cur.execute('INSERT INTO LIVES_IN VALUES(%s,%s,%s)',(int(id[0:3]),id[3:],session['username'][1:]))
 	conn.commit()
@@ -118,9 +149,9 @@ def selected_room(id):
 
 @app.route('/leaveApplication')
 def leave_application():
-	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	conn = mysql.connector.connect(host="localhost",user="hostel_admin",database="hostel_db")
 	cur = conn.cursor()
-	cur.execute('SELECT * FROM LEAVE_REQUEST WHERE hostel_id=%s',(session['username'][1:],))
+	cur.execute('SELECT * FROM LEAVE_REQUEST WHERE hostel_id=%s and Verification_Status=0',(session['username'][1:],))
 	if len(cur.fetchall()) == 0:
 		return render_template('leave_application.html')
 	else:
@@ -129,10 +160,13 @@ def leave_application():
 
 @app.route('/messBooking')
 def messBooking():
-	conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+	conn = mysql.connector.connect(host="localhost",user="hostel_admin",database="hostel_db")
 	cur = conn.cursor()
-	cur.execute('SELECT HOSTEL_ID FROM mess WHERE Month=MONTH(CURDATE()) and Year = YEAR(CURDATE());')
-	if cur.fetchone() == None:
+	st = 'SELECT HOSTEL_ID FROM mess WHERE Month=MONTH(CURDATE()) and Year = YEAR(CURDATE()) and HOSTEL_ID={}'.format(session['username'][1:])
+	print(st)
+	cur.execute(st)
+	a = cur.fetchone()
+	if a == None:
 		return render_template('messbook.html')
 	else:
 		return redirect(url_for('student',msg="Already submitted for this month")) 
@@ -140,7 +174,7 @@ def messBooking():
 @app.route('/submit_mess',methods=['POST'])
 def submit_mess():
 	if request.method == 'POST':
-		conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+		conn = mysql.connector.connect(host="localhost",user="hostel_admin",database="hostel_db")
 		cur = conn.cursor()
 		selection = request.form['select']
 		hostel_ID = session.get('username')[1:]
@@ -154,7 +188,7 @@ def submit_mess():
 @app.route('/submit_leave', methods=['POST'])
 def submit_leave():
 	if request.method == 'POST':
-		conn = mysql.connector.connect(host="localhost",user="root",database="hostel_db",password="mysql")
+		conn = mysql.connector.connect(host="localhost",user="hostel_admin",database="hostel_db")
 		reason = request.form['reason']
 		place = request.form['place']
 		arrival_datetime = request.form['arrival_datetime']
@@ -188,9 +222,8 @@ def register():
 	if request.method == 'POST' and len(request.form) != 0:
 		conn = mysql.connector.connect(
       host="localhost",
-      user="root",
-      database="hostel_db",
-      password="mysql"
+      user="hostel_admin",
+      database="hostel_db"
       )
 		name = request.form['Name']
 		Legal_ID = request.form['Legal_ID']
@@ -257,9 +290,8 @@ def addParent():
 	if request.method == 'POST' and len(request.form) != 0:
 		conn = mysql.connector.connect(
       host="localhost",
-      user="root",
-      database="hostel_db",
-      password="mysql"
+      user="hostel_admin",
+      database="hostel_db"
       )
 		name = request.form['PName']
 		relation = request.form['PRelation']
@@ -284,24 +316,25 @@ def addParent():
 def viewLeaveRequests():
 	db = mysql.connector.connect(
     host="localhost",
-    user="root",
-    password="mysql",
+    user="hostel_admin",
     database="hostel_db"
 	)
 	cursor = db.cursor()
 	cursor.execute('SELECT Hostel_ID FROM leave_request where Verification_Status=0')
 	data = cursor.fetchall()
+	final=[]
 	if len(data) != 0:
-		cursor.execute('SELECT Name from hostelite where Hostel_ID=%s',data[0])
-		data = cursor.fetchall()
-	return render_template('viewLeaveRequests.html',data=data)
+		for i in data:
+			cursor.execute('SELECT Hostel_ID,Name from hostelite where Hostel_ID=%s',i)
+			x = cursor.fetchall()
+			final.append(x)
+	return render_template('viewLeaveRequests.html',data=final)
 
 @app.route('/get_leave_details',methods=['POST'])
 def get_leave_details():
 	db = mysql.connector.connect(
 	host="localhost",
-    user="root",
-    password="mysql",
+    user="hostel_admin",
     database="hostel_db"
 	)
 	name = request.form.get('name')
@@ -337,15 +370,12 @@ def get_leave_details():
 def accept_leave_request():
 	db = mysql.connector.connect(
 		host="localhost",
-		user="root",
-		password="mysql",
+		user="hostel_admin",
 		database="hostel_db"
 	)
 	name = request.form.get('name')
 	cursor = db.cursor(buffered=True)
-	cursor.execute('SELECT * from hostelite WHERE Name=%s',(name,))
-	Hostel_ID = cursor.fetchone()
-	cursor.execute('UPDATE leave_request SET Verification_Status = 1 WHERE Hostel_ID = %s', (Hostel_ID[0],))
+	cursor.execute('UPDATE leave_request SET Verification_Status = 1 WHERE Hostel_ID = %s', (name,))
 	db.commit()
 	cursor.close()
 	return "Request accepted successfully" 
@@ -355,12 +385,11 @@ def accept_leave_request():
 def reject_leave_request():
 	db = mysql.connector.connect(
 		host="localhost",
-		user="root",
-		password="mysql",
+		user="hostel_admin",
 		database="hostel_db"
 	)
 	name = request.form.get('name')
-    
+
 	cursor = db.cursor(buffered=True)
 	cursor.execute('DELETE FROM leave_request WHERE Hostel_ID = %s', (name,))
 
@@ -371,8 +400,7 @@ def reject_leave_request():
 def viewRequests():
 	db = mysql.connector.connect(
     host="localhost",
-    user="root",
-    password="mysql",
+    user="hostel_admin",
     database="hostel_db"
 	)
 	cursor = db.cursor()
@@ -387,8 +415,7 @@ def viewRequests():
 def get_details():
 	db = mysql.connector.connect(
 	host="localhost",
-    user="root",
-    password="mysql",
+    user="hostel_admin",
     database="hostel_db"
 	)
 	name = request.form.get('name')
@@ -475,8 +502,7 @@ def get_details():
 def accept_request():
 	db = mysql.connector.connect(
 		host="localhost",
-		user="root",
-		password="mysql",
+		user="hostel_admin",
 		database="hostel_db"
 	)
 	name = request.form.get('name')
@@ -497,8 +523,7 @@ def search_details():
 	name = request.form.get('name')
 	db = mysql.connector.connect(
 		host="localhost",
-		user="root",
-		password="mysql",
+		user="hostel_admin",
 		database="hostel_db"
 	)
 	cur = db.cursor(buffered=True)
@@ -513,8 +538,7 @@ def search_details():
 def reject_request():
 	db = mysql.connector.connect(
 		host="localhost",
-		user="root",
-		password="mysql",
+		user="hostel_admin",
 		database="hostel_db"
 	)
 	name = request.form.get('name')
@@ -531,8 +555,7 @@ def reject_request():
 def showRoomDetails():
 	db = mysql.connector.connect(
 		host="localhost",
-		user="root",
-		password="mysql",
+		user="hostel_admin",
 		database="hostel_db"
 	)
 	cursor = db.cursor(buffered=True)
@@ -542,8 +565,7 @@ def showRoomDetails():
 	db.close()
 	db = mysql.connector.connect(
 		host="localhost",
-		user="root",
-		password="mysql",
+		user="hostel_admin",
 		database="hostel_db"
 	)
 	cursor = db.cursor(buffered=True)
@@ -554,5 +576,42 @@ def showRoomDetails():
 	db.close()
 	return render_template('roomOccupants.html',room_data=a+b)
 
+@app.route('/showCurrentOccupants')
+def showCurrentOccupants():
+	db = mysql.connector.connect(
+		host="localhost",
+		user="hostel_admin",
+		database="hostel_db"
+	)
+	cursor = db.cursor(buffered=True)
+	cursor.execute('''
+		SELECT
+			h.name,
+			l.hostel_id,
+			l.room_no,
+			l.block_name
+		FROM
+			hostelite h
+		JOIN
+			lives_in l ON h.hostel_id = l.hostel_id
+		WHERE
+			l.hostel_id NOT IN (
+				SELECT DISTINCT
+					hostel_id
+				FROM
+					leave_request
+				WHERE
+					Verification_Status = 1
+					AND CURRENT_TIMESTAMP>Leaving_Datetime
+					AND CURRENT_TIMESTAMP<Arrival_Datetime
+			);
+	''')
+	return render_template('currentOccupants.html',data=cursor.fetchall())
+
+@app.route('/vacate')
+def vacate():
+    hostel_id_to_be_removed = int(session['username'][1:]) 
+    move_to_backup(hostel_id_to_be_removed)
+    return redirect(url_for('home'))
 if __name__ == "__main__":
 	app.run(debug=True)
